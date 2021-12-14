@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: ISC
+// SPDX-License-Identifier: MIT
 // Copyright © 2021 The Yzix Authors
 syntax = "proto3";
-package store;
+package yzix.proto.store.v1;
 
 message Regular {
   bytes contents = 0;

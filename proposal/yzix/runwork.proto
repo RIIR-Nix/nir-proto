@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: ISC
+// SPDX-License-Identifier: MIT
 // Copyright © 2021 The Yzix Authors
 syntax = "proto3";
-package runwork;
+package yzix.proto.runwork.v1;
 
 // To allow a dynamic redistribution of work, we can't push the build graph
 // to the server, as we would need to repartition, etc. it really often,

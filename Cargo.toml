@@ -1,8 +1,7 @@
-# NOTE: this won't build, as the directory structure currently mismatches
 [package]
-name = "yzix-proto"
+name = "nir-proto"
 version = "0.1.0"
-license = "ISC"
+license = "MIT"
 edition = "2021"
 build = "build.rs"
 
