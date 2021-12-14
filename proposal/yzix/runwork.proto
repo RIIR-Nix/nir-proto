@@ -38,20 +38,20 @@ message RwrAndMeta {
   // only this component gets hashed, if the hash mismatches, it is
   // automatically deleted (e.g. doesn't produce an error, because
   // it would otherwise allow a denial-of-service of the whole system)
-  RunWorkRequest req = 0;
+  RunWorkRequest req = 1;
 
   // optional, to increase the priority on builder systems for older entries.
   // this may be somehow combined with size of to-be-downloaded store entries
   // or such.
-  uint64 pushtime = 1;
+  uint64 pushtime = 2;
 
   // non-empty if a builder has claimed this work item, this update MUST be done
   // atomically (e.g. using etcd transactions).
-  string claimed = 2;
+  string claimed = 3;
 }
 
 message Success {
-  map<string, bytes> outputs = 0;
+  map<string, bytes> outputs = 1;
 }
 
 message Error {
@@ -74,10 +74,10 @@ message Error {
 message RunWork {
   oneof state {
     // request or pending
-    RwrAndMeta rwrm = 0;
+    RwrAndMeta rwrm = 1;
 
     // response
-    Success    suc  = 1;
-    Error      err  = 2;
+    Success    suc  = 2;
+    Error      err  = 3;
   }
 }
