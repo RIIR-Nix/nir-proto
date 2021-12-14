@@ -1,0 +1,14 @@
+# NOTE: this won't build, as the directory structure currently mismatches
+[package]
+name = "yzix-proto"
+version = "0.1.0"
+license = "ISC"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+bytes = "1.1"
+prost = "0.9"
+
+[build-dependencies]
+prost-build = "0.9"

@@ -1,0 +1,83 @@
+// SPDX-License-Identifier: ISC
+// Copyright © 2021 The Yzix Authors
+syntax = "proto3";
+package runwork;
+
+// To allow a dynamic redistribution of work, we can't push the build graph
+// to the server, as we would need to repartition, etc. it really often,
+// which would make the server too complex. Also, stopping the execution of
+// the unprocessed part of the object graph would be near impossible.
+// Dump, UnDump, Fetch, Require is superseded by the store protocol
+// AssertEqual, Eval: done by the client
+message RunWorkRequest {
+  // store path and hash type are deduced from the etcd prefix.
+  // the system is a string to avoid needing to update this file in case
+  // a system/arch or subspec is added. It is necessary to make sure that
+  // the processor architecture matches the things it wants to execute.
+  string system = 1;
+  // flags can be specified to limit the amount of systems that try to schedule
+  // this item, e.g. 'big-parallel' or 'ram-4gib+', to make sure the worker
+  // system has enough resources to complete the request.
+  repeated string flags = 2;
+
+  // primary input variables
+  repeated string args = 3; // required, if empty, request always fails
+  map<string, string> envs = 4;
+  // note that values in proto3 are implicitly optional
+  string new_root = 5;
+
+  repeated string outputs = 6; // required, if empty, request alwayd fails
+  // uses_placeholders={if store paths are used} can be deduced
+  //  by parsing 'args' and 'envs', which is necessary anyways,
+  //  because the server can't assume that all input paths are correctly
+  //  described otherwise.
+}
+
+// this structure MUST be updated atomically against the queue.
+message RwrAndMeta {
+  // only this component gets hashed, if the hash mismatches, it is
+  // automatically deleted (e.g. doesn't produce an error, because
+  // it would otherwise allow a denial-of-service of the whole system)
+  RunWorkRequest req = 0;
+
+  // optional, to increase the priority on builder systems for older entries.
+  // this may be somehow combined with size of to-be-downloaded store entries
+  // or such.
+  uint64 pushtime = 1;
+
+  // non-empty if a builder has claimed this work item, this update MUST be done
+  // atomically (e.g. using etcd transactions).
+  string claimed = 2;
+}
+
+message Success {
+  map<string, bytes> outputs = 0;
+}
+
+message Error {
+  oneof erro {
+    // catch-all for all errors where specification here would not
+    // be of much use. should be used almost never
+    string underspecified = 1;
+    // invalid work specification, this is a string because the client
+    // can't do anything about it anyways
+    string invalid_workspec = 2;
+    // returned with exit code ...
+    sint32 exit = 3;
+    // command was killed with signal ...
+    sint32 killed = 4;
+    // server-side I/O error with errno ...
+    sint32 io = 5;
+  }
+}
+
+message RunWork {
+  oneof state {
+    // request or pending
+    RwrAndMeta rwrm = 0;
+
+    // response
+    Success    suc  = 1;
+    Error      err  = 2;
+  }
+}

@@ -1,0 +1,108 @@
+// SPDX-License-Identifier: ISC
+// Copyright © 2021 The Yzix Authors
+syntax = "proto3";
+package store;
+
+message Regular {
+  bytes contents = 0;
+  bool executable = 1;
+}
+
+message Directory {
+  // one can't place a 'map' directly into a 'oneof'
+  map<string, Dump> inner = 0;
+}
+
+message SymLink {
+  string target = 0;
+  bool to_dir = 1;
+}
+
+message Dump {
+  oneof dumpo {
+    Regular regular = 0;
+    Directory directory = 1;
+    SymLink symlink = 2;
+  }
+}
+
+message Hash {
+  // this should contain the raw data, not base32/base64/hex or whatever
+  bytes dat = 1; // required
+
+  // type of the hash (e.g. by which function was this hash generated)
+  enum Type {
+    // type used by Nix by default, sha256, and then the bytes are reversed
+    REVSHA256 = 0;
+    // blake2b with length reduced to 32 bytes, used by yzix by default
+    BLAKE2B256 = 1;
+  }
+  Type ty = 2; // required
+}
+
+// TODO
+message Signature {
+}
+
+message FetchRequest {
+  string url  = 0; // required
+
+  // NOTE: if a hash is specified and already present in the store,
+  // no fetch will take place
+  Hash   hash = 1; // optional
+
+  // if a hash is specified and already present in the store,
+  // the fetch will only take place when the
+  bool verify = 2;
+}
+
+message FetchError {
+  // don't retransmit the url, except maybe in the messahe
+  string msg = 0;
+  // optional HTTP status code, if present in upstream response
+  uint32 status_code = 1;
+}
+
+message HashMismatchError {
+  Hash got_hash = 0;
+  Hash expected_hash = 1;
+  // if both hashes are equal, and this error is sent, then a
+  // hash collision happened.
+}
+
+message FetchResponse {
+  oneof resp {
+    Hash success = 1;
+    FetchError primerr = 2;
+    HashMismatchError hasherr = 3;
+    // server-side I/O error, this is the errno.
+    sint32 ioerr = 4;
+  }
+}
+
+// TODO
+message DumpError {
+}
+
+message DumpResponse {
+  oneof dro {
+    Dump dump = 1;
+    DumpError err = 2;
+  }
+}
+
+message Realisation {
+  Hash outhash = 1;
+  Signature signature = 2;
+}
+
+service Store {
+  // coordinator <->> store, fetch URL
+  rpc FetchUrlToStore(FetchRequest) returns FetchResponse;
+
+  // builder <->> store, fetch Dump
+  rpc GetDump(Hash) returns DumpResponse;
+
+  // builder <->> store, get inhash->outhash association
+  rpc GetRealisation(Hash) returns Realisation;
+}
