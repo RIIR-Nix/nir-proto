@@ -1,0 +1,12 @@
+// SPDX-License-Identifier: MIT
+// Copyright © 2021 The Yzix Authors
+syntax = "proto3";
+package yzix.proto.hashty.v1;
+
+// type of the hash (e.g. by which function was this hash generated)
+enum HashType {
+  // type used by Nix by default, sha256, and then the bytes are reversed
+  REVSHA256 = 0;
+  // blake2b with length reduced to 32 bytes, used by yzix by default
+  BLAKE2B256 = 1;
+}

@@ -1,0 +1,38 @@
+// SPDX-License-Identifier: MIT
+// Copyright © 2021 The Yzix Authors
+syntax = "proto3";
+package yzix.proto..v1;
+
+import "./hashty.proto";
+
+message Success {
+  map<string, bytes> outputs = 1;
+}
+
+message Error {
+  oneof erro {
+    // catch-all for all errors where specification here would not
+    // be of much use. should be used almost never
+    string underspecified = 1;
+    // invalid work specification, this is a string because the client
+    // can't do anything about it anyways
+    string invalid_workspec = 2;
+    // returned with exit code ...
+    sint32 exit = 3;
+    // command was killed with signal ...
+    sint32 killed = 4;
+    // server-side I/O error with errno ...
+    sint32 io = 5;
+  }
+}
+
+message Response {
+  HashType hty = 1;
+  bytes inhash = 2;
+
+  oneof state {
+    // response
+    Success    suc  = 3;
+    Error      err  = 4;
+  }
+}
