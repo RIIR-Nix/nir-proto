@@ -41,4 +41,9 @@ message Request {
   // this may be somehow combined with size of to-be-downloaded store entries
   // or such.
   uint64 pushtime = 2;
+
+  // if set, schedule this on a builder even when it is already present in
+  // the store. this is used to check if the resulting hash is the same,
+  // -> if the task is deterministic
+  bool force_rebuild = 3;
 }
