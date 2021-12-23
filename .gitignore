@@ -1,4 +1,5 @@
 .#*
+/.direnv
 /target
 result
 result-lib
