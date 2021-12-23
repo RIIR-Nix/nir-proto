@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright © 2021 The Yzix Authors
 syntax = "proto3";
-package yzix.proto..v1;
+package yzix.proto.done.v1;
 
-import "./hashty.proto";
+import "hashty.proto";
 
 message Success {
   map<string, bytes> outputs = 1;
@@ -27,7 +27,7 @@ message Error {
 }
 
 message Response {
-  HashType hty = 1;
+  yzix.proto.hashty.v1.HashType hty = 1;
   bytes inhash = 2;
 
   oneof state {
